@@ -15,27 +15,34 @@ const Favorites = () => {
   useEffect(() => {
     let results = [...favorites];
     
-    // Apply search filter
-    if (searchTerm) {
-      results = results.filter(movie => 
-        movie.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (movie.year && movie.year.toString().includes(searchTerm))
-      );
+    // Robust search filter with null checks
+    if (searchTerm.trim()) {
+      const searchTermLower = searchTerm.toLowerCase();
+      results = results.filter(movie => {
+        // Safely handle undefined movie or properties
+        const title = movie?.title?.toLowerCase() || '';
+        const year = movie?.year?.toString() || '';
+        
+        return (
+          title.includes(searchTermLower) || 
+          year.includes(searchTerm)
+        );
+      });
     }
     
-    // Apply sorting
+    // Apply sorting with null checks
     switch (sortBy) {
       case 'title-asc':
-        results.sort((a, b) => a.title.localeCompare(b.title));
+        results.sort((a, b) => (a?.title || '').localeCompare(b?.title || ''));
         break;
       case 'title-desc':
-        results.sort((a, b) => b.title.localeCompare(a.title));
+        results.sort((a, b) => (b?.title || '').localeCompare(a?.title || ''));
         break;
       case 'year-asc':
-        results.sort((a, b) => (a.year || 0) - (b.year || 0));
+        results.sort((a, b) => (a?.year || 0) - (b?.year || 0));
         break;
       case 'year-desc':
-        results.sort((a, b) => (b.year || 0) - (a.year || 0));
+        results.sort((a, b) => (b?.year || 0) - (a?.year || 0));
         break;
       default:
         // Default order (likely added order)
@@ -92,11 +99,13 @@ const Favorites = () => {
               placeholder="Search favorites..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
+              aria-label="Search favorites"
             />
             {searchTerm && (
               <button 
                 className="favorites-clear-search"
                 onClick={() => setSearchTerm('')}
+                aria-label="Clear search"
               >
                 <FiX />
               </button>
@@ -106,6 +115,8 @@ const Favorites = () => {
           <button 
             className={`favorites-filter-btn ${showFilters ? 'active' : ''}`}
             onClick={() => setShowFilters(!showFilters)}
+            aria-expanded={showFilters}
+            aria-label="Filter options"
           >
             <FiFilter /> Filters
           </button>
@@ -117,10 +128,12 @@ const Favorites = () => {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
+            aria-hidden={!showFilters}
           >
             <div className="favorites-filter-group">
-              <label>Sort by:</label>
+              <label htmlFor="sort-select">Sort by:</label>
               <select 
+                id="sort-select"
                 value={sortBy} 
                 onChange={(e) => setSortBy(e.target.value)}
               >
@@ -169,9 +182,9 @@ const Favorites = () => {
           initial="hidden"
           animate="visible"
         >
-          {filteredFavorites.map(movie => (
+          {filteredFavorites.map((movie, index) => (
             <motion.div 
-              key={movie.imdbID} 
+              key={movie?.imdbID || index}
               variants={itemVariants}
               whileHover={{ scale: 1.03 }}
             >

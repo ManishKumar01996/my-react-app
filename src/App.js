@@ -40,7 +40,7 @@ function App() {
         <nav className="main-nav">
           <Link to="/" className="nav-btn">Home</Link>
           <Link to="/favorites" className="nav-btn">Favorites</Link>
-          <SearchBar />
+          
         </nav>
         <Routes>
           <Route path="/" element={<HomePage />} />

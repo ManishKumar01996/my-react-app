@@ -11,45 +11,60 @@ const Favorites = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('default');
   const [showFilters, setShowFilters] = useState(false);
+  const [searchError, setSearchError] = useState(null);
 
   useEffect(() => {
-    let results = [...favorites];
-    
-    // Robust search filter with null checks
-    if (searchTerm.trim()) {
-      const searchTermLower = searchTerm.toLowerCase();
-      results = results.filter(movie => {
-        // Safely handle undefined movie or properties
-        const title = movie?.title?.toLowerCase() || '';
-        const year = movie?.year?.toString() || '';
-        
-        return (
-          title.includes(searchTermLower) || 
-          year.includes(searchTerm)
-        );
-      });
+    try {
+      let results = [...favorites];
+      
+      if (searchTerm.trim()) {
+        const searchTermLower = searchTerm.toLowerCase().trim();
+        results = results.filter(movie => {
+          try {
+            if (!movie) return false;
+            
+            // Normalize all searchable fields
+            const title = String(movie.title || '').toLowerCase().trim();
+            const year = String(movie.year || '').trim();
+            const imdbID = String(movie.imdbID || '').toLowerCase().trim();
+            
+            return (
+              title.includes(searchTermLower) ||
+              year.includes(searchTerm) ||
+              imdbID.includes(searchTermLower)
+            );
+          } catch (error) {
+            console.error('Error processing movie:', movie, error);
+            return false;
+          }
+        });
+      }
+      
+      // Sorting with enhanced null safety
+      switch (sortBy) {
+        case 'title-asc':
+          results.sort((a, b) => String(a?.title || '').localeCompare(String(b?.title || '')));
+          break;
+        case 'title-desc':
+          results.sort((a, b) => String(b?.title || '').localeCompare(String(a?.title || '')));
+          break;
+        case 'year-asc':
+          results.sort((a, b) => (parseInt(a?.year) || 0) - (parseInt(b?.year) || 0));
+          break;
+        case 'year-desc':
+          results.sort((a, b) => (parseInt(b?.year) || 0) - (parseInt(a?.year) || 0));
+          break;
+        default:
+          break;
+      }
+      
+      setFilteredFavorites(results);
+      setSearchError(null);
+    } catch (error) {
+      console.error('Search error:', error);
+      setSearchError('An error occurred during search');
+      setFilteredFavorites(favorites);
     }
-    
-    // Apply sorting with null checks
-    switch (sortBy) {
-      case 'title-asc':
-        results.sort((a, b) => (a?.title || '').localeCompare(b?.title || ''));
-        break;
-      case 'title-desc':
-        results.sort((a, b) => (b?.title || '').localeCompare(a?.title || ''));
-        break;
-      case 'year-asc':
-        results.sort((a, b) => (a?.year || 0) - (b?.year || 0));
-        break;
-      case 'year-desc':
-        results.sort((a, b) => (b?.year || 0) - (a?.year || 0));
-        break;
-      default:
-        // Default order (likely added order)
-        break;
-    }
-    
-    setFilteredFavorites(results);
   }, [favorites, searchTerm, sortBy]);
 
   const containerVariants = {
@@ -74,6 +89,15 @@ const Favorites = () => {
     }
   };
 
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
+  };
+
+  const clearSearch = () => {
+    setSearchTerm('');
+    setSortBy('default');
+  };
+
   return (
     <motion.div 
       className="favorites-page"
@@ -96,15 +120,15 @@ const Favorites = () => {
             <FiSearch className="favorites-search-icon" />
             <input
               type="text"
-              placeholder="Search favorites..."
+              placeholder="Search by title, year, or ID..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={handleSearchChange}
               aria-label="Search favorites"
             />
             {searchTerm && (
               <button 
                 className="favorites-clear-search"
-                onClick={() => setSearchTerm('')}
+                onClick={clearSearch}
                 aria-label="Clear search"
               >
                 <FiX />
@@ -147,6 +171,12 @@ const Favorites = () => {
           </motion.div>
         )}
       </div>
+
+      {searchError && (
+        <div className="favorites-error">
+          {searchError}
+        </div>
+      )}
       
       {filteredFavorites.length === 0 ? (
         <motion.div 
@@ -157,13 +187,10 @@ const Favorites = () => {
         >
           {searchTerm ? (
             <>
-              <p>No favorites match your search.</p>
+              <p>No favorites match "{searchTerm}"</p>
               <button 
                 className="favorites-reset-btn"
-                onClick={() => {
-                  setSearchTerm('');
-                  setSortBy('default');
-                }}
+                onClick={clearSearch}
               >
                 Reset filters
               </button>
@@ -176,28 +203,29 @@ const Favorites = () => {
           )}
         </motion.div>
       ) : (
-        <motion.div 
-          className="favorites-list"
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-        >
-          {filteredFavorites.map((movie, index) => (
-            <motion.div 
-              key={movie?.imdbID || index}
-              variants={itemVariants}
-              whileHover={{ scale: 1.03 }}
-            >
-              <MovieCard movie={movie} />
-            </motion.div>
-          ))}
-        </motion.div>
-      )}
-      
-      {filteredFavorites.length > 0 && (
-        <div className="favorites-count">
-          Showing {filteredFavorites.length} of {favorites.length} favorites
-        </div>
+        <>
+          <motion.div 
+            className="favorites-list"
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+          >
+            {filteredFavorites.map((movie, index) => (
+              <motion.div 
+                key={`${movie?.imdbID || 'missing-id'}-${index}`}
+                variants={itemVariants}
+                whileHover={{ scale: 1.03 }}
+              >
+                <MovieCard movie={movie} />
+              </motion.div>
+            ))}
+          </motion.div>
+          
+          <div className="favorites-count">
+            Showing {filteredFavorites.length} of {favorites.length} favorites
+            {searchTerm && ` matching "${searchTerm}"`}
+          </div>
+        </>
       )}
     </motion.div>
   );

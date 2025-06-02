@@ -9,20 +9,31 @@ const MovieContext = createContext();
 const MovieProvider = ({ children }) => {
   const [movies, setMovies] = useState([]);
   const [favorites, setFavorites] = useState(() => {
-    // Initialize favorites from localStorage if available
     const saved = localStorage.getItem('omdb-favorites');
     return saved ? JSON.parse(saved) : [];
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [currentMovie, setCurrentMovie] = useState(null);
+  const [genres, setGenres] = useState([]); // Added genres state
 
-  // Save favorites to localStorage whenever they change
+  // Initialize with some common genres (OMDb doesn't provide a genre list API)
+  const initializeGenres = useCallback(() => {
+    const commonGenres = [
+      'Action', 'Adventure', 'Animation', 'Biography', 'Comedy',
+      'Crime', 'Documentary', 'Drama', 'Family', 'Fantasy',
+      'Film-Noir', 'History', 'Horror', 'Music', 'Musical',
+      'Mystery', 'Romance', 'Sci-Fi', 'Sport', 'Thriller',
+      'War', 'Western'
+    ];
+    setGenres(commonGenres.map((genre, index) => ({ id: index + 1, name: genre })));
+  }, []);
+
+  // Save favorites to localStorage
   useEffect(() => {
     localStorage.setItem('omdb-favorites', JSON.stringify(favorites));
   }, [favorites]);
 
-  // Memoized API call function
   const makeApiCall = useCallback(async (params) => {
     try {
       const response = await axios.get(BASE_URL, {
@@ -43,48 +54,50 @@ const MovieProvider = ({ children }) => {
     }
   }, []);
 
-  // Fetch popular movies with pagination
-  const fetchPopularMovies = useCallback(async (page = 1) => {
+  // Enhanced fetch function with filtering support
+  const fetchMovies = useCallback(async (options = {}) => {
+    const { query = '', page = 1, year } = options;
     setLoading(true);
     setError(null);
     try {
-      const data = await makeApiCall({
-        s: 'movie',
+      const params = {
+        s: query || 'movie', // Default to 'movie' if no query
         type: 'movie',
         page
-      });
-      setMovies(data.Search || []);
+      };
+
+      if (year) {
+        params.y = year;
+      }
+
+      const data = await makeApiCall(params);
+      const results = data.Search || [];
+
+      // Enhance movies with genre information (OMDb returns genre as a string)
+      const enhancedResults = results.map(movie => ({
+        ...movie,
+        genres: movie.Genre ? movie.Genre.split(', ').map(genre => ({
+          id: genre.toLowerCase().replace(' ', '-'),
+          name: genre.trim()
+        })) : []
+      }));
+
+      setMovies(enhancedResults);
+      return enhancedResults;
     } catch (err) {
-      setError(err.message || 'Failed to fetch popular movies');
+      setError(err.message || 'Failed to fetch movies');
+      return [];
     } finally {
       setLoading(false);
     }
   }, [makeApiCall]);
 
-  // Search movies with debounce-ready function
-  const searchMovies = useCallback(async (query, page = 1) => {
-    if (!query.trim()) {
-      fetchPopularMovies();
-      return;
-    }
+  // Search movies with filtering options
+  const searchMovies = useCallback(async (query, options = {}) => {
+    return fetchMovies({ ...options, query });
+  }, [fetchMovies]);
 
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await makeApiCall({
-        s: query,
-        type: 'movie',
-        page
-      });
-      setMovies(data.Search || []);
-    } catch (err) {
-      setError(err.message || 'No movies found');
-    } finally {
-      setLoading(false);
-    }
-  }, [fetchPopularMovies, makeApiCall]);
-
-  // for  movie details
+  // Get movie details with full information
   const getMovieDetails = useCallback(async (id) => {
     setLoading(true);
     setError(null);
@@ -93,8 +106,18 @@ const MovieProvider = ({ children }) => {
         i: id,
         plot: 'full'
       });
-      setCurrentMovie(data);
-      return data;
+      
+      // Enhance with genre array
+      const enhancedMovie = {
+        ...data,
+        genres: data.Genre ? data.Genre.split(', ').map(genre => ({
+          id: genre.toLowerCase().replace(' ', '-'),
+          name: genre.trim()
+        })) : []
+      };
+
+      setCurrentMovie(enhancedMovie);
+      return enhancedMovie;
     } catch (err) {
       setError(err.message || 'Failed to load movie details');
       return null;
@@ -119,10 +142,11 @@ const MovieProvider = ({ children }) => {
     return favorites.some(fav => fav.imdbID === imdbID);
   }, [favorites]);
 
-  // Initialize with popular movies
+  // Initialize with popular movies and genres
   useEffect(() => {
-    fetchPopularMovies();
-  }, [fetchPopularMovies]);
+    initializeGenres();
+    fetchMovies();
+  }, [fetchMovies, initializeGenres]);
 
   return (
     <MovieContext.Provider
@@ -130,9 +154,10 @@ const MovieProvider = ({ children }) => {
         movies,
         favorites,
         currentMovie,
+        genres, // Added genres to context
         loading,
         error,
-        fetchPopularMovies,
+        fetchMovies, // Replaced fetchPopularMovies with more generic fetchMovies
         searchMovies,
         getMovieDetails,
         addToFavorites,

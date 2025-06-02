@@ -1,29 +1,25 @@
 import { useMovieContext } from '../context/MovieContext';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import MovieCard from '../components/MovieCard';
-import './HomePage.css'; 
+import './HomePage.css';
 
 const HomePage = () => {
-  const { movies, loading, error, fetchPopularMovies, searchMovies } = useMovieContext();
+  const { 
+    movies, 
+    loading, 
+    error, 
+    fetchPopularMovies, 
+    searchMovies 
+  } = useMovieContext();
+  
   const location = useLocation();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
 
-  // Get search query from URL on initial load
-  useEffect(() => {
-    const searchParams = new URLSearchParams(location.search);
-    const search = searchParams.get('search') || '';
-    setSearchQuery(search);
-    if (search) {
-      handleSearch(search);
-    } else {
-      fetchPopularMovies();
-    }
-  }, [location.search]);
-
-  const handleSearch = async (query) => {
+  // Memoized search handler
+  const handleSearch = useCallback(async (query) => {
     try {
       setIsSearching(true);
       if (query.trim()) {
@@ -36,24 +32,41 @@ const HomePage = () => {
     } finally {
       setIsSearching(false);
     }
-  };
+  }, [fetchPopularMovies, searchMovies]);
 
-  const handleSearchSubmit = (e) => {
+  // Initialize search from URL
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const search = searchParams.get('search') || '';
+    setSearchQuery(search);
+    handleSearch(search);
+  }, [location.search, handleSearch]);
+
+  // Form submission handler
+  const handleSearchSubmit = useCallback((e) => {
     e.preventDefault();
     navigate(`?search=${encodeURIComponent(searchQuery)}`);
-  };
+  }, [navigate, searchQuery]);
 
-  const handleInputChange = (e) => {
+  // Input change handler
+  const handleInputChange = useCallback((e) => {
     setSearchQuery(e.target.value);
-  };
+  }, []);
 
-  const clearSearch = () => {
+  // Clear search handler
+  const clearSearch = useCallback(() => {
     setSearchQuery('');
     navigate('/');
-  };
+  }, [navigate]);
 
-  if (loading || isSearching) return <div className="loading">Loading movies...</div>;
-  if (error) return <div className="error">Error: {error}</div>;
+  // Loading and error states
+  if (loading || isSearching) {
+    return <div className="loading">Loading movies...</div>;
+  }
+
+  if (error) {
+    return <div className="error">Error: {error}</div>;
+  }
 
   return (
     <div className="home-page">
@@ -66,10 +79,18 @@ const HomePage = () => {
           placeholder="Search movies..."
           value={searchQuery}
           onChange={handleInputChange}
+          aria-label="Search movies"
         />
-        <button type="submit">Search</button>
+        <button type="submit" aria-label="Search">
+          Search
+        </button>
         {searchQuery && (
-          <button type="button" onClick={clearSearch} className="clear-btn">
+          <button 
+            type="button" 
+            onClick={clearSearch} 
+            className="clear-btn"
+            aria-label="Clear search"
+          >
             Clear
           </button>
         )}
@@ -78,7 +99,7 @@ const HomePage = () => {
       {/* Results Count */}
       {searchQuery && (
         <div className="results-count">
-          Found {movies.length} results for "{searchQuery}"
+          Found {movies.length} {movies.length === 1 ? 'result' : 'results'} for "{searchQuery}"
         </div>
       )}
 
@@ -86,7 +107,10 @@ const HomePage = () => {
       <div className="movie-list">
         {movies.length > 0 ? (
           movies.map(movie => (
-            <MovieCard key={movie.id || movie.imdbID} movie={movie} />
+            <MovieCard 
+              key={movie.imdbID} 
+              movie={movie} 
+            />
           ))
         ) : (
           <div className="no-results">

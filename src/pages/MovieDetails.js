@@ -4,15 +4,20 @@ import { useEffect } from 'react';
 import './MovieDetails.css';
 
 const MovieDetails = () => {
+  // Get the movie ID from the URL parameters
   const { id } = useParams();
+
+  // Get current movie details, loading, error, and fetch function from context
   const { currentMovie, loading, error, getMovieDetails } = useMovieContext();
 
+  // Fetch movie details when the component mounts or the ID changes
   useEffect(() => {
     if (id) {
       getMovieDetails(id);
     }
   }, [id, getMovieDetails]);
 
+  // Show loading state while fetching movie details
   if (loading) {
     return (
       <div className="centered">
@@ -21,6 +26,7 @@ const MovieDetails = () => {
     );
   }
 
+  // Show error message if there was a problem fetching details
   if (error) {
     return (
       <div className="centered error">
@@ -29,6 +35,7 @@ const MovieDetails = () => {
     );
   }
 
+  // Show message if no movie data is available
   if (!currentMovie) {
     return (
       <div className="centered">
@@ -37,17 +44,21 @@ const MovieDetails = () => {
     );
   }
 
+  // Render the movie details
   return (
     <div className="movie-container">
+      {/* Back link to home page */}
       <Link to="/" className="back-link">← Back to Home</Link>
 
       <div className="movie-details">
+        {/* Movie poster */}
         <img
           src={currentMovie.Poster !== 'N/A' ? currentMovie.Poster : '/fallback.jpg'}
           alt={`Poster of the movie ${currentMovie.Title}`}
           className="poster"
         />
 
+        {/* Movie information */}
         <div className="movie-info">
           <h1>{currentMovie.Title}</h1>
           <p><strong>Year:</strong> {currentMovie.Year}</p>

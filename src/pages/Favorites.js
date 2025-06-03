@@ -6,28 +6,34 @@ import { FiHeart, FiFilter, FiX, FiSearch } from 'react-icons/fi';
 import './Favorites.css';
 
 const Favorites = () => {
+  // Get favorites from context
   const { favorites } = useMovieContext();
+
+  // Local state for filtered favorites, search, sorting, filter visibility, and error
   const [filteredFavorites, setFilteredFavorites] = useState(favorites);
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('default');
   const [showFilters, setShowFilters] = useState(false);
   const [searchError, setSearchError] = useState(null);
 
+  // Effect to filter and sort favorites when dependencies change
   useEffect(() => {
     try {
       let results = [...favorites];
-      
+
+      // Filter by search term if provided
       if (searchTerm.trim()) {
         const searchTermLower = searchTerm.toLowerCase().trim();
         results = results.filter(movie => {
           try {
             if (!movie) return false;
-            
+
             // Normalize all searchable fields
             const title = String(movie.title || '').toLowerCase().trim();
             const year = String(movie.year || '').trim();
             const imdbID = String(movie.imdbID || '').toLowerCase().trim();
-            
+
+            // Check if any field matches the search term
             return (
               title.includes(searchTermLower) ||
               year.includes(searchTerm) ||
@@ -39,8 +45,8 @@ const Favorites = () => {
           }
         });
       }
-      
-      // Sorting with enhanced null safety
+
+      // Sort results based on selected sort option
       switch (sortBy) {
         case 'title-asc':
           results.sort((a, b) => String(a?.title || '').localeCompare(String(b?.title || '')));
@@ -57,16 +63,18 @@ const Favorites = () => {
         default:
           break;
       }
-      
+
       setFilteredFavorites(results);
       setSearchError(null);
     } catch (error) {
+      // Handle errors during search/filter
       console.error('Search error:', error);
       setSearchError('An error occurred during search');
       setFilteredFavorites(favorites);
     }
   }, [favorites, searchTerm, sortBy]);
 
+  // Animation variants for framer-motion
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -89,10 +97,12 @@ const Favorites = () => {
     }
   };
 
+  // Handle search input change
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
   };
 
+  // Clear search and reset sort
   const clearSearch = () => {
     setSearchTerm('');
     setSortBy('default');
@@ -105,6 +115,7 @@ const Favorites = () => {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
     >
+      {/* Header with title, search bar, and filter button */}
       <div className="favorites-header">
         <motion.h1 
           className="favorites-title"
@@ -116,6 +127,7 @@ const Favorites = () => {
         </motion.h1>
         
         <div className="favorites-controls">
+          {/* Search bar */}
           <div className="favorites-search-bar">
             <FiSearch className="favorites-search-icon" />
             <input
@@ -136,6 +148,7 @@ const Favorites = () => {
             )}
           </div>
           
+          {/* Filter button */}
           <button 
             className={`favorites-filter-btn ${showFilters ? 'active' : ''}`}
             onClick={() => setShowFilters(!showFilters)}
@@ -146,6 +159,7 @@ const Favorites = () => {
           </button>
         </div>
         
+        {/* Filter options dropdown */}
         {showFilters && (
           <motion.div 
             className="favorites-filter-options"
@@ -172,12 +186,14 @@ const Favorites = () => {
         )}
       </div>
 
+      {/* Error message if search/filter fails */}
       {searchError && (
         <div className="favorites-error">
           {searchError}
         </div>
       )}
       
+      {/* Empty state if no favorites match */}
       {filteredFavorites.length === 0 ? (
         <motion.div 
           className="favorites-empty-state"
@@ -204,6 +220,7 @@ const Favorites = () => {
         </motion.div>
       ) : (
         <>
+          {/* Favorites list with animation */}
           <motion.div 
             className="favorites-list"
             variants={containerVariants}
@@ -221,6 +238,7 @@ const Favorites = () => {
             ))}
           </motion.div>
           
+          {/* Show count of filtered favorites */}
           <div className="favorites-count">
             Showing {filteredFavorites.length} of {favorites.length} favorites
             {searchTerm && ` matching "${searchTerm}"`}

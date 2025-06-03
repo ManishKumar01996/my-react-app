@@ -4,48 +4,30 @@ import { MovieProvider } from './context/MovieContext';
 import HomePage from './pages/HomePage';
 import MovieDetails from './pages/MovieDetails';
 import Favorites from './pages/Favorites';
+import About from './pages/About';
+import Profile from './pages/Profile';
 import './App.css';
 
-function SearchBar() {
-  const [query, setQuery] = useState('');
-  const navigate = useNavigate();
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (query.trim()) {
-      navigate(`/?search=${encodeURIComponent(query.trim())}`);
-      setQuery('');
-    }
-  };
-
-  return (
-    <form className="search-bar" onSubmit={handleSubmit}>
-      <input
-        type="text"
-        placeholder="Search movies..."
-        value={query}
-        onChange={e => setQuery(e.target.value)}
-        className="search-input"
-      />
-      <button type="submit" className="search-btn">Search</button>
-    </form>
-  );
-}
-
-
+// Main App component sets up routing and navigation
 function App() {
   return (
     <MovieProvider>
       <Router>
+        {/* Navigation bar with links to Home and Favorites */}
         <nav className="main-nav">
           <Link to="/" className="nav-btn">Home</Link>
           <Link to="/favorites" className="nav-btn">Favorites</Link>
+          <Link to="/about" className="nav-btn">About</Link>
+          <Link to="/profile" className="nav-btn">Profile</Link>
           
         </nav>
+        {/* Define application routes */}
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/movie/:id" element={<MovieDetails />} />
           <Route path="/favorites" element={<Favorites />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/profile" element={<Profile />} />
         </Routes>
       </Router>
     </MovieProvider>

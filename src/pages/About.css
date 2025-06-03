@@ -1,0 +1,166 @@
+/* Main container for the About page */
+.about-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Content area for About page */
+.about-content {
+  flex: 1;
+}
+
+/* Section styling for About page */
+.about-section {
+  margin-bottom: 2.5rem;
+}
+
+/* Section headings */
+.about-section h2 {
+  color: #ff6b6b;
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+}
+
+/* Paragraphs in About sections */
+.about-section p {
+  line-height: 1.6;
+  color: #555;
+}
+
+/* Features list styling */
+.features-list {
+  list-style-type: none;
+  padding-left: 0;
+}
+
+/* Individual feature item */
+.features-list li {
+  position: relative;
+  padding-left: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+/* Custom bullet for features list */
+.features-list li::before {
+  content: "•";
+  color: #ff6b6b;
+  font-size: 1.5rem;
+  position: absolute;
+  left: 0;
+  top: -0.2rem;
+}
+
+/* Tech stack container */
+.tech-stack {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+/* Individual tech item styling */
+.tech-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #f5f5f5;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+}
+
+/* Tech icon image */
+.tech-item img {
+  width: 24px;
+  height: 24px;
+}
+
+/* Call-to-action buttons container */
+.cta-buttons {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+  flex-wrap: wrap;
+}
+
+/* CTA button base styling */
+.cta-buttons a {
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+/* Home button styling */
+.home-button {
+  background-color: #007bff;
+  color: white;
+}
+
+/* Watchlist button styling */
+.watchlist-button {
+  background-color: #6c757d;
+  color: white;
+}
+
+/* Footer styling for About page */
+.about-footer {
+  margin-top: 3rem;
+  padding-top: 2rem;
+  border-top: 1px solid #eee;
+  text-align: center;
+}
+
+/* Developer info section in footer */
+.developer-info {
+  margin-bottom: 1rem;
+}
+
+/* Social links container */
+.social-links {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+/* Social icon styling */
+.social-icon {
+  font-size: 1.5rem;
+  color: #555;
+  transition: color 0.3s ease;
+}
+
+/* Social icon hover effect */
+.social-icon:hover {
+  color: #ff6b6b;
+}
+
+/* Copyright text */
+.copyright {
+  color: #777;
+  font-size: 0.9rem;
+}
+
+/* Responsive design for About page */
+@media (max-width: 768px) {
+  .about-container {
+    padding: 1.5rem;
+  }
+  
+  .tech-stack {
+    gap: 1rem;
+  }
+  
+  .cta-buttons {
+    flex-direction: column;
+  }
+  
+  .cta-buttons a {
+    width: 100%;
+    text-align: center;
+  }
+}

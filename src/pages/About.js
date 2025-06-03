@@ -65,8 +65,8 @@ const AboutPage = () => {
           <Link to="/" className="home-button">
             Back to Home
           </Link>
-          <Link to="/watchlist" className="watchlist-button">
-            View Your Watchlist
+          <Link to="/favorites" className="favorites-button">
+            View Your Favorites
           </Link>
         </div>
       </main>

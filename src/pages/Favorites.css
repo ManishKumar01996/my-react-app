@@ -6,7 +6,7 @@
   min-height: calc(100vh - 120px);
 }
 
-/* Header section containing title and controls */
+/* Header section containing title */
 .favorites-header {
   margin-bottom: 2rem;
   position: relative;
@@ -25,113 +25,6 @@
 .favorites-heart-icon {
   margin-right: 15px;
   color: #ff6b6b;
-}
-
-/* Controls section: search bar and filter button */
-.favorites-controls {
-  display: flex;
-  gap: 1rem;
-  margin-bottom: 1rem;
-  align-items: center;
-}
-
-/* Search bar container */
-.favorites-search-bar {
-  position: relative;
-  flex-grow: 1;
-  max-width: 400px;
-}
-
-/* Search input styling */
-.favorites-search-bar input {
-  width: 100%;
-  padding: 0.75rem 1rem 0.75rem 2.5rem;
-  border-radius: 30px;
-  border: 1px solid #ddd;
-  font-size: 1rem;
-  transition: all 0.3s ease;
-}
-
-/* Focus state for search input */
-.favorites-search-bar input:focus {
-  outline: none;
-  border-color: #ff6b6b;
-  box-shadow: 0 0 0 2px rgba(255, 107, 107, 0.2);
-}
-
-/* Search icon inside search bar */
-.favorites-search-icon {
-  position: absolute;
-  left: 1rem;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #999;
-}
-
-/* Clear search button inside search bar */
-.favorites-clear-search {
-  position: absolute;
-  right: 1rem;
-  top: 50%;
-  transform: translateY(-50%);
-  background: none;
-  border: none;
-  color: #999;
-  cursor: pointer;
-  padding: 0.25rem;
-}
-
-/* Filter button styling */
-.favorites-filter-btn {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.25rem;
-  background-color: #f8f9fa;
-  border: 1px solid #ddd;
-  border-radius: 30px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-/* Filter button hover state */
-.favorites-filter-btn:hover {
-  background-color: #e9ecef;
-}
-
-/* Active filter button styling */
-.favorites-filter-btn.active {
-  background-color: #ff6b6b;
-  color: white;
-  border-color: #ff6b6b;
-}
-
-/* Filter options dropdown */
-.favorites-filter-options {
-  background-color: #f8f9fa;
-  padding: 1rem;
-  border-radius: 8px;
-  margin-bottom: 1rem;
-  border: 1px solid #eee;
-}
-
-/* Filter group layout */
-.favorites-filter-group {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-/* Label for filter group */
-.favorites-filter-group label {
-  font-weight: 500;
-}
-
-/* Select dropdown for sorting */
-.favorites-filter-group select {
-  padding: 0.5rem;
-  border-radius: 4px;
-  border: 1px solid #ddd;
 }
 
 /* Grid layout for favorite movie cards */
@@ -190,21 +83,6 @@
   
   .favorites-title {
     font-size: 2rem;
-  }
-  
-  .favorites-controls {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  
-  .favorites-search-bar {
-    max-width: 100%;
-  }
-  
-  .favorites-filter-group {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.5rem;
   }
   
   .favorites-list {

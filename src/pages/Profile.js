@@ -1,6 +1,6 @@
 import './Profile.css';
 
-// Array of user profiles (5 users)
+// Array of user profiles
 const users = [
   {
     name: "Manish Kumar",

@@ -8,7 +8,7 @@ const Favorites = () => {
   // Get favorites from context
   const { favorites } = useMovieContext();
 
-  // Local state for filtered favorites (no search/filter UI now)
+  // Local state for filtered favorites 
   const [filteredFavorites, setFilteredFavorites] = useState(favorites);
 
   // Effect to keep filteredFavorites in sync with favorites
